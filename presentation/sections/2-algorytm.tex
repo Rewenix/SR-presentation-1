@@ -1,9 +1,59 @@
 % !TeX root = ../main.tex
 \section{Algorytm}
 
-\begin{frame}{Model synchroniczny}
-  \begin{itemize}
-    \item Obliczenie przebiega w rundach.
-    \item W każdej rundzie proces wysyła wiadomości, odbiera je i wykonuje obliczenia lokalne.
-  \end{itemize}
+\begin{frame}{Główne fazy}
+  \begin{enumerate}[<+->]
+    \item Losowe wygenerowanie kandydatów na lidera.
+        \begin{enumerate}[<+->]
+            \item Jeśli wygenerowany zbiór jest pusty powtarzamy fazę 1.
+        \end{enumerate}
+    \item Weryfikujemy że został wybrany dokładnie jeden kandydat.
+        \begin{enumerate}[<+->]
+            \item Któryś z węzłów orientuje się, że jest więcej niż jeden lider.
+            \item Wszystkie węzły wiedzą czy wybrano unikatowego lidera
+        \end{enumerate}
+  \end{enumerate}
+  \pause
+  Procedura ta jest powtarzana aż zostanie wybrany dokładnie jeden lider.
+\end{frame}
+
+\begin{frame}{Faza 1}
+    Cała procedura trwa $2N-1 \geq n$ rundy.
+    \begin{enumerate}[<+->]
+        \item Z prawdopodobieństwem $\frac{c}{N}$ węzeł zostaje kandydatem
+        \item Komunikacja:
+            \begin{itemize}
+                \item Kandydaci inicjują komunikację wysyłając bit na wyjście
+                \item Pozostałe węzły tylko przekazują wiadomości dalej
+            \end{itemize}
+        \item Węzeł wie, że istnieje jakiś kandydad dokładnie gdy zobaczył jakąś wiadomość
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Faza 2.1}
+    \textbf{Cel: Jeśli jest więcej niż jeden kandydat to któryś węzeł musi to zauważyć}
+    
+    \pause
+    Przez dokładnie $N-1$ rund węzły komunikują się w następujący sposób:
+    \begin{itemize}
+        \item Kandydaci - inicjują komunikację wysyłając bit. Nie przekazują dalej odczytanych wiadomości.
+        \item Pozostałe węzły - przekazują dalej wiadomości
+    \end{itemize}
+    \pause 
+    Jeśli kandydat otrzymał bit to wie że jest więcej niż jeden kandydat (bo $n > N-1$).
+    \pause
+    Jeśli jest więcej niż jeden kandydat to muszą być dwaj kandydaci w odległości co najwyżej $N-1$.
+\end{frame}
+
+\begin{frame}{Faza 2.2}
+    \textbf{Cel: wszyscy wiedzą czy się udało} 
+
+    \pause
+    Przez dokładnie $2N-1$ rund węzły komunikują się w następujący sposób:
+    \begin{itemize}
+        \item Kandydaci którzy wiedzą że jest więcej niż jeden kandydat - inicjują komunikację wysyłając bit. Nie przekazują dalej odczytanych wiadomości.
+        \item Pozostałe węzły - przekazują dalej wiadomości
+    \end{itemize}
+    \pause 
+    Procedura zakończyła się sukcesem dokładnie gdy zaobserwowaliśmy jakąś wiadomość
 \end{frame}
