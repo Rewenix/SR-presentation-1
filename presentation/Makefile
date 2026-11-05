@@ -5,7 +5,7 @@ TEX  := pdflatex -interaction=nonstopmode -halt-on-error
 
 all: $(MAIN).pdf
 
-$(MAIN).pdf: $(wildcard *.tex)
+$(MAIN).pdf: $(wildcard *.tex sections/*.tex)
 	$(TEX) $(MAIN).tex
 	$(TEX) $(MAIN).tex
 

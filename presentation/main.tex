@@ -1,30 +1,9 @@
 \documentclass[aspectratio=169,11pt]{beamer}
 
-% --- Language & fonts -------------------------------------------------------
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[polish]{babel}
-\usepackage{lmodern}
-
-% --- Theme ------------------------------------------------------------------
-\usetheme{metropolis}
-\metroset{progressbar=frametitle, numbering=fraction}
-\setbeamertemplate{navigation symbols}{}
-
-% --- Math & algorithms ------------------------------------------------------
-\usepackage{amsmath,amssymb,amsthm}
-\usepackage{algorithm2e}
-
-% --- Diagrams ---------------------------------------------------------------
-\usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,calc,shapes,fit,backgrounds}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.18}
-
-\input{styles}
+\input{preamble}
 
 % --- Metadata ---------------------------------------------------------------
-\title{Tytuł prezentacji}
+\title{Synchroniczny wybór lidera przy przybliżonym $n$}
 \subtitle{Systemy Rozproszone}
 \author{Kacper Paciorek}
 \institute{Teoretyczna Informatyka, Uniwersytet Jagielloński}
@@ -34,46 +13,16 @@
 
 \maketitle
 
-\begin{frame}{Przykład: tekst i graf}
-  \begin{columns}[T,onlytextwidth]
-    \begin{column}{0.5\textwidth}
-      \begin{itemize}
-        \item<1-> Sieć modelujemy jako graf $G = (V, E)$.
-        \item<2-> Proces $p_1$ inicjuje rozgłaszanie.
-        \item<3-> Wiadomość dociera do sąsiadów w kolejnych rundach.
-        \item<4-> Liczba rund $\leq$ średnica grafu $D$.
-      \end{itemize}
-    \end{column}
-
-    \begin{column}{0.45\textwidth}
-      \centering
-      \begin{tikzpicture}[node distance=14mm]
-        \node[proc] (p1) {$p_1$};
-        \node[proc, above right=of p1] (p2) {$p_2$};
-        \node[proc, below right=of p1] (p3) {$p_3$};
-        \node[proc, below right=of p2] (p4) {$p_4$};
-        \node[proc, right=of p4] (p5) {$p_5$};
-
-        \draw[link] (p1) -- (p2);
-        \draw[link] (p1) -- (p3);
-        \draw[link] (p2) -- (p4);
-        \draw[link] (p3) -- (p4);
-        \draw[link] (p2) -- (p3);
-        \draw[link] (p4) -- (p5);
-
-        % step-by-step highlighting
-        \node<2->[proc, active] at (p1) {$p_1$};
-        \draw<3->[msg] (p1) -- (p2);
-        \draw<3->[msg] (p1) -- (p3);
-        \node<3->[proc, active] at (p2) {$p_2$};
-        \node<3->[proc, active] at (p3) {$p_3$};
-        \draw<4->[msg] (p2) -- (p4);
-        \draw<4->[msg] (p4) -- (p5);
-        \node<4->[proc, active] at (p4) {$p_4$};
-        \node<4->[proc, active] at (p5) {$p_5$};
-      \end{tikzpicture}
-    \end{column}
-  \end{columns}
+\begin{frame}{Plan prezentacji}
+  \tableofcontents
 \end{frame}
+
+% --- Sections ---------------------------------------------------------------
+% Each file in sections/ starts with \section{...} and contains its frames.
+% Comment out a line to temporarily skip a section while working on another.
+\input{sections/1-problem}
+\input{sections/2-algorytm}
+\input{sections/test-1}
+\input{sections/test-2}
 
 \end{document}

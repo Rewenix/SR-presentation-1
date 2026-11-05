@@ -1,0 +1,37 @@
+% !TeX root = ../main.tex
+\section{Treść problemu}
+
+\begin{frame}{Treść problemu}
+  Cel: wybór lidera przy następujących założeniach:
+      \pause
+    \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.62\textwidth}
+      \begin{enumerate}[<+->]
+        \item Topologia: skierowany $n$-cykl.
+        \item Obliczenia są synchroniczne. W każdej rundzie węzeł:
+          \begin{enumerate}[<+->]
+            \item odbiera wiadomość,
+            \item zmienia swój stan,
+            \item może wysłać jedną wiadomość odczytaną w następnej rundzie
+          \end{enumerate}
+        \item Wiemy jedynie, że $N \leq n \leq 2N-1$, gdzie $N$ jest znane
+          każdemu węzłowi.
+        \item Węzły mają dostęp do niezależnych ciągów losowych liczb
+          rzeczywistych o rozkładzie jednostajnym na $[0, 1]$.
+      \end{enumerate}
+    \end{column}
+
+    \begin{column}{0.34\textwidth}
+      \centering
+      % Directed 5-cycle, nodes placed clockwise on a circle
+      \begin{tikzpicture}
+        \foreach \i in {1,...,5} {
+          \node[proc] (p\i) at ({90 - 72*(\i-1)}:1.5cm) {$p_\i$};
+        }
+        \foreach \i/\j in {1/2, 2/3, 3/4, 4/5, 5/1} {
+          \draw[dlink] (p\i) to[bend left=20] (p\j);
+        }
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
