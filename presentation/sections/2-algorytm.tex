@@ -31,18 +31,58 @@
 \end{frame}
 
 \begin{frame}{Faza 2.1}
-    \textbf{Cel: Jeśli jest więcej niż jeden kandydat to któryś węzeł musi to zauważyć}
-    
-    \pause
+    \textbf{Cel: Jeśli jest więcej niż jeden kandydat to któryś węzeł musi to zauważyć}
+
+    \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.6\textwidth}
+    \uncover<2->{
     Przez dokładnie $N-1$ rund węzły komunikują się w następujący sposób:
     \begin{itemize}
         \item Kandydaci - inicjują komunikację wysyłając bit. Nie przekazują dalej odczytanych wiadomości.
         \item Pozostałe węzły - przekazują dalej wiadomości
     \end{itemize}
-    \pause 
+    }
+    \uncover<3->{
     Jeśli kandydat otrzymał bit to wie że jest więcej niż jeden kandydat (bo $n > N-1$).
-    \pause
+    }
+
+    \uncover<4->{
     Jeśli jest więcej niż jeden kandydat to muszą być dwaj kandydaci w odległości co najwyżej $N-1$.
+    }
+    \end{column}
+
+    \begin{column}{0.36\textwidth}
+      \centering
+      % N = 3, n = 5; candidates v_1, v_3 at distance 2 = N - 1.
+      % v_1's bit reaches v_3 after 2 rounds; v_3's bit stops at v_5.
+      \begin{tikzpicture}
+        \foreach \i in {1,...,5} {
+          \node[proc] (v\i) at ({90 - 72*(\i-1)}:1.5cm) {$v_\i$};
+        }
+        \foreach \i/\j in {1/2, 2/3, 3/4, 4/5, 5/1} {
+          \draw[dlink] (v\i) to[bend left=20] (v\j);
+        }
+        % candidates
+        \node[proc, active] at (v1) {$v_1$};
+        \node[proc, active] at (v3) {$v_3$};
+        % messages, labelled with the round in which they are sent
+        \draw<2->[msg] (v1) to[bend left=20] node[auto, font=\scriptsize] {1} (v2);
+        \draw<2->[msg] (v2) to[bend left=20] node[auto, font=\scriptsize] {2} (v3);
+        \draw<2->[msg] (v3) to[bend left=20] node[auto, font=\scriptsize] {1} (v4);
+        \draw<2->[msg] (v4) to[bend left=20] node[auto, font=\scriptsize] {2} (v5);
+        % the candidate that detects another candidate
+        \node<3->[proc, aware] at (v3) {$v_3$};
+      \end{tikzpicture}
+
+      \medskip
+      {\scriptsize $N = 3$, $n = 5$\\ liczby przy strzałkach: numer rundy\par}
+      \smallskip
+      {\scriptsize
+        \tikz\node[proc, active, minimum size=3mm]{}; kandydat\quad
+        \only<3->{\tikz\node[proc, aware, minimum size=3mm]{}; kandydat, który wie}
+      \par}
+    \end{column}
+    \end{columns}
 \end{frame}
 
 \begin{frame}{Faza 2.2}

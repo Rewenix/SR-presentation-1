@@ -1,0 +1,159 @@
+% !TeX root = ../main.tex
+\section{Analiza złożoności}
+
+\begin{frame}{Złożoność}
+  \begin{itemize}[<+->]
+    \item Oczekiwany łączny rozmiar wysłanych wiadomości:
+    $$ \bar{C} = (3\bar{k}_{ALG}-2)n + N - 1 $$
+    \item Oczekiwana liczba rund:
+    $$ \bar{T} = \bar{k}_{ALG}(3N - 2 + \bar{k}_{SEL}(2N-1)) $$
+  \end{itemize}
+  Gdzie:
+  \begin{itemize}
+    \item $\bar{k}_{SEL}$ - oczekiwana liczba iteracji aż zostanie wylosowany jakiś kandydat w fazie 1. Spełnia $\bar{k}_{SEL} < 1/(1-e^{-c})$
+    \item $\bar{k}_{ALG}$ - oczekiwana liczba iteracji całej procedury aż ta zakończy się sukcesem. Spełnia $\bar{k}_{ALG} < \bigl(e^{2c} \cdot e^{c^{2}/(N - c)} - 1\bigr)/c$
+    \end{itemize}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Złożoność bitowa: podział na fazy}
+  Liczba bitów wysłanych w jednym wywołaniu algorytmu:
+  \medskip
+  \begin{center}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{lcc}
+      \hline
+      Faza & jeden kandydat & więcej niż jeden kandydat \\
+      \hline
+      1 (wszystkie iteracje) & $n$     & $n$        \\
+      2.1                    & $N - 1$ & $\leq n$   \\
+      2.2                    & $0$     & $n$        \\
+      \hline
+      Razem                  & $n + N - 1$ & $\leq 3n$ \\
+      \hline
+    \end{tabular}
+  \end{center}
+  \pause
+  \[
+    \bar{C} = 3n(\bar{k}_{ALG} - 1) + n + N - 1 = (3\bar{k}_{ALG} - 2)n + N - 1
+  \]
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Złożoność czasowa: podział na fazy}
+  Liczba rund w jednym wywołaniu algorytmu:
+  \medskip
+  \begin{center}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{lc}
+      \hline
+      Faza & liczba rund \\
+      \hline
+      1 (wszystkie iteracje) & $\bar{k}_{SEL}(2N - 1)$ \\
+      2.1                    & $N - 1$ \\
+      2.2                    & $2N - 1$ \\
+      \hline
+      Razem                  & $3N - 2 + \bar{k}_{SEL}(2N - 1)$ \\
+      \hline
+    \end{tabular}
+  \end{center}
+  \pause
+  \[
+    \bar{T} = \bar{k}_{ALG}\bigl(3N - 2 + \bar{k}_{SEL}(2N - 1)\bigr)
+  \]
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Oszacowanie $\bar{k}_{SEL}$}
+  Niech $M$ oznacza liczbę kandydatów wylosowanych w jednej iteracji fazy 1:
+  \[
+    \Pr(M = i) = \binom{n}{i} \left(\frac{c}{N}\right)^{i}
+                 \left(1 - \frac{c}{N}\right)^{n-i}
+  \]
+  \pause
+  Prawdopodobieństwo, że wystarczy jedna iteracja fazy 1:
+  \[
+    \Pr\nolimits_{SEL} = \Pr(M > 0) = 1 - \left(1 - \frac{c}{N}\right)^{n}
+    \geq 1 - \left(1 - \frac{c}{N}\right)^{N} > 1 - e^{-c}
+  \]
+  \pause
+  Zatem
+  \[
+    \bar{k}_{SEL} = \Pr\nolimits_{SEL}^{-1} < \frac{1}{1 - e^{-c}}
+  \]
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Oszacowanie $\bar{k}_{ALG}$: prawdopodobieństwo sukcesu}
+  Prawdopodobieństwo, że cały algorytm wykona się tylko raz:
+  \begin{align*}
+    \Pr\nolimits_{ALG}
+      &= \Pr(M = 1 \mid M > 0)
+       = \frac{\Pr(M = 1 \,\&\, M > 0)}{\Pr(M > 0)}
+       = \frac{\Pr(M = 1)}{\Pr\nolimits_{SEL}} \\
+      &= \frac{n \frac{c}{N} \left(1 - \frac{c}{N}\right)^{n-1}}
+              {1 - \left(1 - \frac{c}{N}\right)^{n}}
+       = \frac{n \frac{c}{N}}
+              {\left(\left(1 - \frac{c}{N}\right)^{-n} - 1\right)
+               \left(1 - \frac{c}{N}\right)}
+  \end{align*}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Oszacowanie $\bar{k}_{ALG}$: liczba wywołań}
+  \begin{align*}
+    \bar{k}_{ALG} = \Pr\nolimits_{ALG}^{-1}
+      &= \frac{\left(\left(1 - \frac{c}{N}\right)^{-n} - 1\right)
+               \left(1 - \frac{c}{N}\right)}{n \frac{c}{N}} \\
+      &< \frac{\left(1 - \frac{c}{N}\right)^{-n} - 1}{c}
+      \leq \frac{\left(1 - \frac{c}{N}\right)^{-(2N-1)} - 1}{c}
+      < \frac{\left(\left(1 - \frac{c}{N}\right)^{-N}\right)^{2} - 1}{c}
+  \end{align*}
+  \pause
+  \begin{itemize}
+    \item Pierwsza nierówność: $n \geq N$, więc
+      $\frac{N}{n}\left(1 - \frac{c}{N}\right) < 1$.
+    \item Druga nierówność: $n \leq 2N - 1$.
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Oszacowanie $\bar{k}_{ALG}$: ograniczenie $\left(1 - \frac{c}{N}\right)^{-N}$}
+  Dla $c < N$:
+  \begin{align*}
+    \left(1 - \frac{c}{N}\right)^{-N}
+      &= \exp\left(-N \ln\left(1 - \frac{c}{N}\right)\right)
+       = \exp\left(N \sum_{k=1}^{\infty} \frac{1}{k}\left(\frac{c}{N}\right)^{k}\right) \\
+      &= e^{c} \exp\left(N \sum_{k=2}^{\infty} \frac{1}{k}\left(\frac{c}{N}\right)^{k}\right)
+       < e^{c} \exp\left(\frac{N}{2} \sum_{k=2}^{\infty} \left(\frac{c}{N}\right)^{k}\right) \\
+      &\leq e^{c} \exp\left(\frac{N}{2}\left(\frac{c}{N}\right)^{2}
+            \left(1 - \frac{c}{N}\right)^{-1}\right)
+       \leq e^{c} \exp\left(\frac{c^{2}}{2(N - c)}\right)
+  \end{align*}
+  \pause
+  Stąd
+  \[
+    \bar{k}_{ALG}
+      < \frac{1}{c}\left[\left(e^{c} \exp\left(\frac{c^{2}}{2(N-c)}\right)\right)^{2} - 1\right]
+      = \frac{1}{c}\left[e^{2c} \exp\left(\frac{c^{2}}{N - c}\right) - 1\right]
+  \]
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Przypadek $c = \frac{1}{2}$}
+  Dla $N = 1$ problem jest trywialny, a ograniczenie na $\bar{k}_{ALG}$ maleje
+  z $N$, więc wystarczy $N = 2$:
+  \begin{align*}
+    \bar{k}_{ALG} &< 2\left(e \cdot \exp\left(\frac{1/4}{2 - 1/2}\right) - 1\right)
+                    = 2\left(e^{7/6} - 1\right) \approx 4.4225411 \\
+    \bar{k}_{SEL} &< \frac{1}{1 - e^{-1/2}} \approx 2.5415
+  \end{align*}
+  \pause
+  \begin{align*}
+    \bar{C} &= 3n(\bar{k}_{ALG} - 1) + n + N - 1 < 11.2676233\,n + N - 1 \\
+    \bar{T} &= \bar{k}_{ALG}\bigl(3N - 2 + \bar{k}_{SEL}(2N - 1)\bigr)
+             < 35.747347\,N - 20.08494
+  \end{align*}
+  \pause
+  \textbf{Wniosek:} $\bar{C} < 12n + N - 1$, \quad $\bar{T} < 36N$.
+\end{frame}

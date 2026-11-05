@@ -26,10 +26,10 @@
       % Directed 5-cycle, nodes placed clockwise on a circle
       \begin{tikzpicture}
         \foreach \i in {1,...,5} {
-          \node[proc] (p\i) at ({90 - 72*(\i-1)}:1.5cm) {$p_\i$};
+          \node[proc] (v\i) at ({90 - 72*(\i-1)}:1.5cm) {$v_\i$};
         }
         \foreach \i/\j in {1/2, 2/3, 3/4, 4/5, 5/1} {
-          \draw[dlink] (p\i) to[bend left=20] (p\j);
+          \draw[dlink] (v\i) to[bend left=20] (v\j);
         }
       \end{tikzpicture}
     \end{column}
