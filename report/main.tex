@@ -8,7 +8,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{hyperref}
 
-\title{Synchroniczny wybór lidera na cyklu przy przybliżonym $n$}
+\title{Synchroniczny wybór lidera na cyklu przy przybliżonym $n$ - raport}
 \author{Kacper Paciorek}
 \date{\today}
 
@@ -39,7 +39,7 @@ Można się zastanawiać dlaczego zakładamy że znamy $n$ z taką dokładności
 \end{theorem}
 \begin{proof}
     Załóżmy że mamy algorytm, który działa dla $N$. Rozważmy konkretny jego przebieg aż do zatrzymania. Przyjmijmy teraz, że 
-    dla dwukrotnie dłuższego cyklu procesy $i, i+n$ przebiagają dokładnie tak samo jak przebiegało $i$ w przebiegu dla $N$. Jest to możliwe bo 
+    dla dwukrotnie dłuższego cyklu procesy $i, i+N$ przebiagają dokładnie tak samo jak przebiegało $i$ w przebiegu dla $N$. Jest to możliwe bo 
     generatory losowe są niezależne a topologia sieci sprawia w takiej sytuacji że procesy dostają te same wiadomości. To jednak oznacza, że na koniec 
     dwa procesy mają status lidera. Jest to sprzeczność.
 \end{proof}
@@ -232,6 +232,62 @@ Następnie w szacowaniu na $\bar{C}$ zamiast policzyć współczynnik przy $n$ j
 Błąd przy $\bar{T}$ jest konsekwencją zaniżonej wartości $\bar{k}_{ALG}$ .
 
 \section{Symulacje}
+
+Aby sprawdzić powyższą analizę, algorytm został zaimplementowany w języku Go (każdy proces jako osobna gorutyna, rundy synchronizowane barierą) i uruchomiony dla różnych parametrów. 
+Dla każdego zestawu parametrów wykonano $1000$ niezależnych eksperymentów i uśredniono liczbę rund oraz liczbę wysłanych wiadomości (bitów). Poprawność każdego eksperymentu była sprawdzana: 
+program kończył się błędem, gdy po zakończeniu algorytmu liczba liderów była różna od jeden. 
+
+Rozważono dwa przypadki:
+\begin{itemize}
+    \item małe $N=5$, wszystkie możliwe $n \in \{5,\dots,9\}$ (czyli $N \leq n \leq 2N-1$) oraz $c \in \{0{,}25;\ 0{,}5;\ 1{,}0\}$,
+    \item duże $N=100$, wybrane $n \in \{100, 125, 150, 199\}$ oraz $c = 0{,}5$.
+\end{itemize}
+
+W tabeli \ref{tab:sym} dla każdego przypadku porównano wartość zmierzoną z dwoma wartościami teoretycznymi:
+\begin{itemize}
+    \item \emph{dokładną} - wzory \eqref{eq:C} i \eqref{eq:T} z wartościami $\bar{k}_{SEL} = 1/(1-q^n)$ oraz $\bar{k}_{ALG} = (1-q^n)/(n\frac{c}{N}q^{n-1})$, gdzie $q = 1-c/N$, 
+    czyli przed uproszczeniami z poprzedniej sekcji,
+    \item \emph{ograniczeniem} - te same wzory z $\bar{k}_{SEL}$ i $\bar{k}_{ALG}$ zastąpionymi przez ograniczenia \eqref{eq:ksel} i \eqref{eq:kalg}.
+\end{itemize}
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabular}{rrr|rrr|rrr}
+        \hline
+        & & & \multicolumn{3}{c|}{liczba rund} & \multicolumn{3}{c}{liczba wiadomości} \\
+        $N$ & $n$ & $c$ & zmierz. & dokładna & ogranicz. & zmierz. & dokładna & ogranicz. \\
+        \hline
+5 & 5 & 0{,}25 & 57{,}7 & 58{,}6 & 144{,}0 & 10{,}4 & 10{,}7 & 34{,}2 \\
+5 & 6 & 0{,}25 & 53{,}8 & 53{,}6 & 144{,}0 & 12{,}5 & 12{,}5 & 40{,}3 \\
+5 & 7 & 0{,}25 & 52{,}4 & 50{,}2 & 144{,}0 & 14{,}7 & 14{,}6 & 46{,}3 \\
+5 & 8 & 0{,}25 & 48{,}5 & 47{,}9 & 144{,}0 & 16{,}6 & 16{,}9 & 52{,}4 \\
+5 & 9 & 0{,}25 & 46{,}8 & 46{,}2 & 144{,}0 & 19{,}2 & 19{,}4 & 58{,}4 \\
+\hline
+5 & 5 & 0{,}5 & 44{,}3 & 43{,}7 & 134{,}4 & 12{,}9 & 12{,}7 & 50{,}2 \\
+5 & 6 & 0{,}5 & 43{,}5 & 42{,}6 & 134{,}4 & 15{,}6 & 15{,}8 & 59{,}4 \\
+5 & 7 & 0{,}5 & 43{,}9 & 42{,}4 & 134{,}4 & 19{,}6 & 19{,}5 & 68{,}7 \\
+5 & 8 & 0{,}5 & 41{,}6 & 42{,}9 & 134{,}4 & 21{,}7 & 23{,}7 & 77{,}9 \\
+5 & 9 & 0{,}5 & 44{,}1 & 43{,}8 & 134{,}4 & 27{,}4 & 28{,}7 & 87{,}2 \\
+\hline
+5 & 5 & 1{,}0 & 45{,}1 & 43{,}3 & 231{,}2 & 19{,}1 & 18{,}6 & 121{,}3 \\
+5 & 6 & 1{,}0 & 47{,}8 & 47{,}3 & 231{,}2 & 25{,}2 & 25{,}8 & 144{,}8 \\
+5 & 7 & 1{,}0 & 52{,}4 & 52{,}5 & 231{,}2 & 33{,}2 & 35{,}2 & 168{,}2 \\
+5 & 8 & 1{,}0 & 60{,}1 & 59{,}1 & 231{,}2 & 45{,}8 & 47{,}5 & 191{,}7 \\
+5 & 9 & 1{,}0 & 68{,}8 & 67{,}1 & 231{,}2 & 60{,}8 & 63{,}4 & 215{,}2 \\
+\hline
+100 & 100 & 0{,}5 & 1024{,}3 & 1039{,}7 & 2773{,}2 & 285{,}1 & 287{,}5 & 934{,}1 \\
+100 & 125 & 0{,}5 & 993{,}5 & 1006{,}1 & 2773{,}2 & 354{,}5 & 369{,}1 & 1142{,}8 \\
+100 & 150 & 0{,}5 & 969{,}8 & 1003{,}1 & 2773{,}2 & 442{,}8 & 468{,}2 & 1351{,}6 \\
+100 & 199 & 0{,}5 & 1087{,}1 & 1049{,}6 & 2773{,}2 & 725{,}5 & 722{,}8 & 1760{,}8 \\
+\hline
+    \end{tabular}
+    \caption{Wyniki symulacji (średnia z $1000$ eksperymentów) w porównaniu z wartościami teoretycznymi.}
+    \label{tab:sym}
+\end{table}
+
+ Wartości zmierzone są bliskie wartościom dokładnym , co potwierdza poprawność wzorów \eqref{eq:C} i \eqref{eq:T} 
 
 \section{Dodatek - wyznaczenie $n$}
 Warto jeszcze dodać, że po wyznaczeniu lidera można bardzo łatwo poznać dokładną wartość $n$. W tym celu lider wysyła wiadomość. 
