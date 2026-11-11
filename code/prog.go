@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math"
 	"math/rand/v2"
@@ -272,6 +273,8 @@ func electLeader(N int, n int, c float64) (int, int) {
 }
 
 func main() {
+	flag.BoolVar(&verbose, "verbose", false, "wypisuj szczegółowy przebieg algorytmu")
+	flag.Parse()
 	var c float64
 	var n, N, t int
 	fmt.Println("Podaj (N, n, c, t - liczba eksperymentów)")
