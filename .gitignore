@@ -1,0 +1,70 @@
+# --- LaTeX build artifacts --------------------------------------------------
+
+# Core
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fmt
+*.fot
+*.cb
+*.cb2
+*.lb
+
+# Beamer
+*.nav
+*.snm
+*.vrb
+
+# latexmk / synctex / editors
+*.fdb_latexmk
+*.synctex
+*.synctex.gz
+*.synctex(busy)
+*.synctex.gz(busy)
+*.pdfsync
+_minted*
+*.pyg
+
+# Bibliography (biber / bibtex)
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+*-blx.aux
+*-blx.bib
+
+# Indexes / glossaries
+*.idx
+*.ilg
+*.ind
+*.glo
+*.gls
+*.glg
+*.acn
+*.acr
+*.alg
+*.ist
+
+# TikZ externalization / pgfplots
+*.auxlock
+*.figlist
+*.makefile
+*.dpth
+*.md5
+*-figure*.pdf
+*.table
+*.gnuplot
+
+# Algorithms / misc packages
+*.loa
+*.thm
+*.xdv
+*.dvi
+*.ps
+
+# Output
+*.pdf

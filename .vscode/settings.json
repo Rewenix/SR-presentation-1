@@ -1,0 +1,44 @@
+{
+  // --- LaTeX Workshop -------------------------------------------------------
+  // latexmk is not installed, so build with pdflatex directly (2 passes for
+  // the table of contents / beamer navigation).
+  "latex-workshop.latex.tools": [
+    {
+      "name": "pdflatex",
+      "command": "pdflatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "%DOC%"
+      ],
+      "env": {}
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "pdflatex x2",
+      "tools": ["pdflatex", "pdflatex"]
+    },
+    {
+      "name": "pdflatex (single pass, fast)",
+      "tools": ["pdflatex"]
+    }
+  ],
+  "latex-workshop.latex.recipe.default": "first",
+  "latex-workshop.latex.autoBuild.run": "onSave",
+
+  // Always compile presentation/main.tex, even when a section file is open.
+  "latex-workshop.latex.rootFile.useSubFile": false,
+  "latex-workshop.latex.search.rootFiles.include": ["presentation/main.tex"],
+
+  // Open the PDF in a VS Code tab; Ctrl+Click in PDF jumps to source (SyncTeX).
+  "latex-workshop.view.pdf.viewer": "tab",
+
+  // Clean the same artifacts as `make clean`.
+  "latex-workshop.latex.autoClean.run": "never",
+  "latex-workshop.latex.clean.fileTypes": [
+    "*.aux", "*.log", "*.nav", "*.out", "*.snm", "*.toc", "*.vrb",
+    "*.fls", "*.fdb_latexmk", "*.synctex.gz"
+  ]
+}
