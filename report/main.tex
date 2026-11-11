@@ -1,0 +1,241 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+
+\title{Synchroniczny wybór lidera na cyklu przy przybliżonym $n$}
+\author{Kacper Paciorek}
+\date{\today}
+
+\newtheorem{theorem}{Twierdzenie}
+
+\begin{document}
+
+\maketitle
+
+\section{Postawienie problemu}
+Problem omawiany w pracy to wybór lider w siecie o następujących założeniach:
+\begin{enumerate}
+    \item Topologia - sieć to skierowany cykl na $n$ wierzchołkach
+    \item Obliczenia są synchroniczne. W jednej rundzie proces:
+        \begin{enumerate}
+            \item Odbiara wiadomość jeśli jest taka na wejściu
+            \item Wykonuje obliczenia zmieniając swój stan
+            \item Może wysłać jedną wiadomość do następnego procesu na cyklu, która będzie odczytana w następnej rundzie
+        \end{enumerate}
+    \item Algorytm nie zna dokładnego $n$. Procesy dostają jedynie $N$ (wszystkie procesy to samo), które spełnia $N \leq n \leq 2N-1$
+    \item Aby przełamać symetrię procesy mają dostęp do niezależnych generatorów liczb losowych
+\end{enumerate}
+
+Można się zastanawiać dlaczego zakładamy że znamy $n$ z taką dokładnością a nie inną. Odpowiedź na to pytanie wynika z poniższego.
+
+\begin{theorem}
+    Nie istnieje algorytm poprawnie rozwiązujący ten problem dla cyklu wielkości $N$ oraz $2N$.
+\end{theorem}
+\begin{proof}
+    Załóżmy że mamy algorytm, który działa dla $N$. Rozważmy konkretny jego przebieg aż do zatrzymania. Przyjmijmy teraz, że 
+    dla dwukrotnie dłuższego cyklu procesy $i, i+n$ przebiagają dokładnie tak samo jak przebiegało $i$ w przebiegu dla $N$. Jest to możliwe bo 
+    generatory losowe są niezależne a topologia sieci sprawia w takiej sytuacji że procesy dostają te same wiadomości. To jednak oznacza, że na koniec 
+    dwa procesy mają status lidera. Jest to sprzeczność.
+\end{proof}
+
+Z powyższego faktu widać, że założenie o aproksymacji $n$ jest najsłabsze przy którym taki algortym może istnieć. 
+
+Dodatkowym problemem, który rozważają autorzy w tej sytuacji jest ustalenie dokładnej wartości $n$.
+
+\section{Algorytm i poprawność}
+
+Komunikacja w przedstawionym przez autorów algorytmie jest bardzo prosta. Sprowadza się ona tylko do wysyłania jednobitowej wiadomości. 
+Procesy patrzą tylko na to czy w danej turze otrzymały wiadomość. 
+
+Algorytm przedstawiony przez autorów zależy od parametru $c > 0$ i składa się z następujących faz:
+\begin{enumerate}
+    \item \textbf{Losowe wygenerowanie kandydatów na lidera.}
+        \begin{itemize}
+            \item Każdy z procesów z pradwopodobieństwem $\frac{c}{N}$ zostaje kandydatem na lidera
+            \item Następnie procesy przez $2N-1$ rund komunikują się ze sobą w następujący sposób:
+                \begin{itemize}
+                    \item Kandydaci - inicjują komunikację ale nie przekazują danej otrzymanych wiadomości
+                    \item Pozostałe procesy - jeśli w danej turze otrzymały wiadomość to wysyłają ją w następnej
+                \end{itemize}
+                Skoro $2N-1 \geq 1$ to po zakończeniu tej komunikacji proces zobaczył wiadomość dokładnie wtedy gdy został wylosowany jakiś kandydat.
+                Zatem po zakończeniu tej fazy wszystkie procesy wiedzą czy istnieje kandydat.
+            \item Jeśli nie został wybrany żaden kandydat procedura jest powtarzana aż do skutku
+        \end{itemize}
+    \item \textbf{Sprawdzenie czy został wylosowany dokładnie jeden kandydat.} składa się ono z dwóch podfaz: 
+        \begin{enumerate}
+            \item[2.1] \textbf{Co najmniej jeden proces ma się zorientować jeśli jest wiecej niż jeden kandydat.}
+                W tym celu przez dokładnie $N-1$ rund procesy komunikują się zgodnie z regułą:
+                \begin{itemize}
+                    \item Kandydaci - inicjują komunikację ale nie przekazują dalej wiadomości
+                    \item Pozostałe procesy - jeśli w danej turze otrzymały wiadomość to wysyłają ją w następnej
+                \end{itemize}
+                Jeśli, któryś z kandydatów otrzymał wiadomość to wie, że istnieje inny kandydat (n > N-1 więc nie mógł otrzymać spowrotem wiadomości wysłanej przez siebie). 
+                Z drugiej strony jeśli jest więcej niż jeden kandydat to z zasady szufladkowej musi być dwóch w odległości co najwyżej $N-1$. To oznacza, że po zakończeniu tej fazy wiemy, że jest więcej niż
+                jeden kandydat dokładnie wtedy gdy istnieje proces który o tym wie
+            \item[2.2] \textbf {Informacja o tym czy kandydaci się powtórzyli zostaje rozpowszechniona.} W tym celu przez $2N-1$ rund procesy komunikują się tak samo jak w poprzedniaj fazie 
+            z tą róźnićą, że komunikacja jest inicjowana tylko przez te procesy, które zorientowały się, że jest więcej niż jeden kandydat. Jako, że $2N-1 \geq n$ to po zakończeniu tej fazy ta informacja zdążyła dotrzeć do wszystkich procesów.
+        \end{enumerate}
+        Jeśli jest dokładnie jeden kandydat to procedura zakończyła się sukcesem. W przeciwnym wypadku powtarzamy cały algorytm aż do skutku.
+\end{enumerate}
+
+Z powyższego opisu algorytmu jasno wynika, że jeśli procedura ta się zakończyła to został wybrany dokładnie jeden lider. 
+
+\section{Analiza złożoności}
+
+Analizujemy dwie miary: \emph{złożoność bitową} $\bar{C}$, czyli oczekiwaną łączną liczbę bitów wysłanych przez wszystkie procesy,
+oraz \emph{złożoność czasową} $\bar{T}$, czyli oczekiwaną liczbę rund do zakończenia algorytmu. Ponieważ każda wiadomość to pojedynczy bit,
+złożoność bitowa jest równa łącznej liczbie wysłanych wiadomości. Wyniki zależą od parametru $c$ oraz od $N$ i $n$, przy czym $c < N$ i $N \leq n \leq 2N-1$.
+
+Wprowadźmy oznaczenia:
+\begin{itemize}
+    \item \emph{Wywołanie} algorytmu to jedno przejście przez fazy 1, 2.1 i 2.2. Algorytm jest wywoływany od nowa, dopóki wywołanie nie zakończy się sukcesem.
+    \item $\bar{k}_{SEL}$ - oczekiwana liczba iteracji fazy 1 w jednym wywołaniu (czyli aż wylosowany zostanie choć jeden kandydat),
+    \item $\bar{k}_{ALG}$ - oczekiwana liczba wywołań algorytmu aż do sukcesu.
+\end{itemize}
+
+\subsection{Rozbicie na fazy}
+
+Kluczową obserwacją jest to, że w każdej fazie liczba wysłanych bitów jest (prawie) deterministyczna,
+a losowość pojawia się tylko w liczbie powtórzeń.
+
+\paragraph{Faza 1.} Iteracja, w której nie wylosowano żadnego kandydata, nie generuje żadnej komunikacji. Gdy istnieje co najmniej jeden kandydat,
+to bit wysłany przez kandydata biegnie aż do następnego kandydata (który go nie przekazuje) lub z powrotem do niego samego. Ponieważ $2N-1 \geq n$ rund wystarcza,
+aby tak się stało, każda krawędź cyklu zostaje użyta dokładnie raz. Zatem niezależnie od liczby iteracji faza 1 kosztuje łącznie dokładnie $n$ bitów.
+Czasowo jedna iteracja trwa $2N-1$ rund, więc faza 1 trwa łącznie $k_{SEL}(2N-1)$ rund, gdzie $k_{SEL}$ jest (losową) liczbą iteracji.
+
+\paragraph{Faza 2.1.} Trwa dokładnie $N-1$ rund.
+\begin{itemize}
+    \item Jeśli jest jeden kandydat, to jego bit pokonuje $N-1 < n$ krawędzi i nie wraca do niego. Koszt: $N-1$ bitów.
+    \item Jeśli kandydatów jest więcej, to każdy bit zatrzymuje się najpóźniej na następnym kandydacie, więc żadna krawędź nie jest użyta więcej niż raz. Koszt: co najwyżej $n$ bitów.
+\end{itemize}
+
+\paragraph{Faza 2.2.} Trwa dokładnie $2N-1$ rund.
+\begin{itemize}
+    \item Jeśli jest jeden kandydat, to nikt nie inicjuje komunikacji. Koszt: $0$ bitów.
+    \item Jeśli kandydatów jest więcej, to istnieje co najmniej jeden proces inicjujący i (analogicznie jak w fazie 1, bo $2N-1 \geq n$) każda krawędź zostaje użyta dokładnie raz. Koszt: $n$ bitów.
+\end{itemize}
+
+Podsumowanie dla jednego wywołania:
+\begin{center}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{lccc}
+        \hline
+        Faza & jeden kandydat & więcej niż jeden kandydat & liczba rund \\
+        \hline
+        1 (wszystkie iteracje) & $n$         & $n$        & $k_{SEL}(2N-1)$ \\
+        2.1                    & $N-1$       & $\leq n$   & $N-1$ \\
+        2.2                    & $0$         & $n$        & $2N-1$ \\
+        \hline
+        Razem                  & $n + N - 1$ & $\leq 3n$  & $3N-2+k_{SEL}(2N-1)$ \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\subsection{Wzory ogólne}
+
+Kolejne wywołania algorytmu są niezależne i mają to samo prawdopodobieństwo sukcesu, więc liczba wywołań ma rozkład geometryczny.
+Wszystkie wywołania poza ostatnim są nieudane i kosztują co najwyżej $3n$ bitów, a ostatnie kosztuje $n+N-1$. Z liniowości wartości oczekiwanej otrzymujemy
+\begin{equation}\label{eq:C}
+    \bar{C} \leq 3n(\bar{k}_{ALG} - 1) + n + N - 1 = (3\bar{k}_{ALG} - 2)n + N - 1.
+\end{equation}
+Każde wywołanie trwa $3N-2+k_{SEL}(2N-1)$ rund, a liczba iteracji fazy 1 ma w każdym wywołaniu ten sam rozkład, zatem
+\begin{equation}\label{eq:T}
+    \bar{T} = \bar{k}_{ALG}\bigl(3N-2+\bar{k}_{SEL}(2N-1)\bigr).
+\end{equation}
+Pozostaje oszacować $\bar{k}_{SEL}$ i $\bar{k}_{ALG}$.
+
+\subsection{Oszacowanie $\bar{k}_{SEL}$}
+
+Niech $M$ oznacza liczbę kandydatów wylosowanych w jednej iteracji fazy 1. Każdy z $n$ procesów jest kandydatem z prawdopodobieństwem $c/N$, niezależnie od pozostałych, więc
+\[
+    \Pr(M = i) = \binom{n}{i}\left(\frac{c}{N}\right)^{i}\left(1-\frac{c}{N}\right)^{n-i}.
+\]
+Iteracja kończy fazę 1, gdy $M > 0$. Ponieważ $n \geq N$, a $1 - c/N < 1$, oraz $1 - x < e^{-x}$, mamy
+\[
+    \Pr\nolimits_{SEL} = \Pr(M>0) = 1 - \left(1-\frac{c}{N}\right)^{n} \geq 1 - \left(1-\frac{c}{N}\right)^{N} > 1 - e^{-c}.
+\]
+Liczba iteracji jest zmienną geometryczną z prawdopodobieństwem sukcesu $\Pr_{SEL}$, więc
+\begin{equation}\label{eq:ksel}
+    \bar{k}_{SEL} = \frac{1}{\Pr_{SEL}} < \frac{1}{1-e^{-c}}.
+\end{equation}
+
+\subsection{Oszacowanie $\bar{k}_{ALG}$}
+
+Wywołanie kończy się sukcesem dokładnie wtedy, gdy faza 1 zakończyła się z dokładnie jednym kandydatem, czyli gdy $M = 1$ pod warunkiem $M > 0$. Oznaczmy $q = 1 - c/N$. Wtedy
+\[
+    \Pr\nolimits_{ALG} = \Pr(M=1 \mid M>0) = \frac{\Pr(M=1)}{\Pr(M>0)}
+    = \frac{n\frac{c}{N}\,q^{n-1}}{1-q^{n}}
+    = \frac{n\frac{c}{N}}{(q^{-n}-1)\,q}.
+\]
+Stąd, korzystając kolejno z $\frac{N}{n}q < 1$ (bo $n \geq N$ i $q<1$), z $n \leq 2N-1$ oraz z $q^{-(2N-1)} < q^{-2N}$ (bo $q<1$):
+\begin{equation}\label{eq:kalg1}
+    \bar{k}_{ALG} = \frac{1}{\Pr_{ALG}} = \frac{N}{n}\,q\cdot\frac{q^{-n}-1}{c}
+    < \frac{q^{-n}-1}{c} \leq \frac{q^{-(2N-1)}-1}{c} < \frac{\left(q^{-N}\right)^{2}-1}{c}.
+\end{equation}
+
+Oszacujmy teraz $q^{-N}$. Dla $c < N$, korzystając z rozwinięcia $-\ln(1-x) = \sum_{k \geq 1} x^k/k$ dla $x = c/N \in (0,1)$:
+\begin{align*}
+    \left(1-\frac{c}{N}\right)^{-N}
+    &= \exp\left(-N\ln\left(1-\frac{c}{N}\right)\right) = \exp\left(N\sum_{k=1}^{\infty}\frac{1}{k}\left(\frac{c}{N}\right)^{k}\right) \\
+    &= e^{c}\exp\left(N\sum_{k=2}^{\infty}\frac{1}{k}\left(\frac{c}{N}\right)^{k}\right)
+    \leq e^{c}\exp\left(\frac{N}{2}\sum_{k=2}^{\infty}\left(\frac{c}{N}\right)^{k}\right) \\
+    &= e^{c}\exp\left(\frac{N}{2}\cdot\frac{(c/N)^{2}}{1-c/N}\right)
+    = e^{c}\exp\left(\frac{c^{2}}{2(N-c)}\right).
+\end{align*}
+Wstawiając to do \eqref{eq:kalg1} dostajemy
+\begin{equation}\label{eq:kalg}
+    \bar{k}_{ALG} < \frac{1}{c}\left[e^{2c}\exp\left(\frac{c^{2}}{N-c}\right) - 1\right].
+\end{equation}
+
+\subsection{Wynik}
+
+Łącząc \eqref{eq:C}, \eqref{eq:T}, \eqref{eq:ksel} i \eqref{eq:kalg} otrzymujemy następujące twierdzenie.
+
+\begin{theorem}
+    Dla $0 < c < N$ algorytm wybiera lidera ze złożonością bitową i czasową
+    \[
+        \bar{C} \leq (3\bar{k}_{ALG}-2)n + N - 1, \qquad
+        \bar{T} = \bar{k}_{ALG}\bigl(3N-2+\bar{k}_{SEL}(2N-1)\bigr),
+    \]
+    gdzie
+    \[
+        \bar{k}_{SEL} < \frac{1}{1-e^{-c}}, \qquad
+        \bar{k}_{ALG} < \frac{1}{c}\left[e^{2c}\exp\left(\frac{c^{2}}{N-c}\right) - 1\right].
+    \]
+\end{theorem}
+
+\paragraph{Zależność od $c$.} Parametr $c$ pozwala wymieniać czas na komunikację. Gdy $c \to 0$, to $\bar{k}_{ALG}$ zbiega do $2$, więc $\bar{C}$ zbiega do $n+N-1$,
+ale jednocześnie $\bar{k}_{SEL} \to \infty$, a razem z nim $\bar{T}$. Z kolei duże $c$ powoduje, że $\bar{k}_{ALG}$ rośnie, bo z dużym prawdopodobieństwem wylosowanych zostaje wielu kandydatów.
+
+\paragraph{Przypadek $c = \frac{1}{2}$.} Dla $N=1$ problem jest trywialny, więc przyjmijmy $N \geq 2$. Ograniczenie \eqref{eq:kalg} maleje wraz z $N$, więc wystarczy je policzyć dla $N=2$:
+\begin{align*}
+    \bar{k}_{ALG} &< 2\left(e\cdot\exp\left(\frac{1/4}{2-1/2}\right)-1\right) = 2\left(e^{7/6}-1\right) \approx 4{,}4225, \\
+    \bar{k}_{SEL} &< \frac{1}{1-e^{-1/2}} \approx 2{,}5415.
+\end{align*}
+Zatem
+\begin{align*}
+    \bar{C} &\leq 3n(\bar{k}_{ALG}-1) + n + N - 1 < 11{,}28\,n + N - 1, \\
+    \bar{T} &< 4{,}4225\cdot\bigl(3N-2+2{,}5415\,(2N-1)\bigr) < 35{,}75\,N - 20{,}08.
+\end{align*}
+W szczególności $\bar{C} < 12n + N - 1 = O(n)$ oraz $\bar{T} < 36N = O(n)$. Zarówno liczba wysłanych bitów, jak i liczba rund, są więc liniowe względem rozmiaru cyklu,
+mimo że algorytm zna tylko przybliżenie $N$ liczby $n$.
+
+Autorzy w pracy podają, że wyniki w tej sytuacji to $\bar{C} \leq 10n + N - 1$ oraz $\bar{T} \leq 35N$ jednak w dowodzie tego faktu występują błędy rachunkowe. 
+Autorzy najpierw źle podstawiają jedną drugą do ograniczenia na $\bar{k}_{ALG}$ otrzymująć $4{,}2714295$ zamiast $4{,}4225$. 
+Następnie w szacowaniu na $\bar{C}$ zamiast policzyć współczynnik przy $n$ jako $3\bar{k}_{ALG} + 1$ ignorują $+1$ dostając zbyt mało.
+Błąd przy $\bar{T}$ jest konsekwencją zaniżonej wartości $\bar{k}_{ALG}$ .
+
+\section{Symulacje}
+
+\section{Dodatek - wyznaczenie $n$}
+Warto jeszcze dodać, że po wyznaczeniu lidera można bardzo łatwo poznać dokładną wartość $n$. W tym celu lider wysyła wiadomość. 
+Pozostałe procesory przekazują ją w kółko. Pozwalamy aby wiadomość obiegła cykl dwa razy. Wtedy każdy proces może obliczyć $n$ jako róźnica w numerze rundy
+pomiędzy otrzymaniem wiadomości po raz pierwszy i po raz drugi.
+
+\end{document}
